@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://www.4d.com/namespace/reserved/FP/Constants">
+   <appid>"0"</appid>
+   <fourdversmin>"9.0.0"</fourdversmin>
+   <fourdversmax>"9.0.0"</fourdversmax>
+   <command name="Growl UDP Notify" str="10020" topic="2">
+      <param position="6" k="10020"/>
+      <param position="7" k="10021"/>
+   </command>
+</application>
