@@ -43,10 +43,8 @@ extern "C" {
 		void setUTF16String(NSString* pString);
 		NSMutableString* copyUTF16MutableString();
 		NSString* copyUTF16String();
-		bool convertPathSystemToPOSIX();
-		bool convertPathPOSIXToSystem();
-
 		NSString* copyPath();		
+		void setPath(NSString* path);		
 		NSURL *copyUrl();
 #endif
 #endif

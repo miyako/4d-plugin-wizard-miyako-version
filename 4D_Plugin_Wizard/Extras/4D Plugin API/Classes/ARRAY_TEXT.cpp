@@ -82,37 +82,52 @@ void ARRAY_TEXT::toParamAtIndex(PackagePtr pParams, uint32_t index)
 
 void ARRAY_TEXT::convertFromUTF8(const CUTF8String* fromString, CUTF16String* toString)	
 {
-	uint32_t size = ((uint32_t)fromString->length() * sizeof(PA_Unichar)) + sizeof(PA_Unichar);
-	std::vector<uint8_t> buf(size);
+#ifdef _WIN32
+	int len = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (LPCSTR)fromString->c_str(), fromString->length(), NULL, 0);
 	
-	uint32_t len = PA_ConvertCharsetToCharset(
-											  (char *)fromString->c_str(),
-											  (uint32_t)fromString->length(),
-											  eVTC_UTF_8,
-											  (char *)&buf[0],
-											  size,
-											  eVTC_UTF_16
-											  );
-	
-//	*toString = CUTF16String((const PA_Unichar *)&buf[0], len);	
-	*toString = CUTF16String((const PA_Unichar *)&buf[0], len/2);	
+	if(len){
+		std::vector<uint8_t> buf(len * sizeof(PA_Unichar));
+		if(MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (LPCSTR)fromString->c_str(), fromString->length(), (LPWSTR)&buf[0], len)){
+			*toString = CUTF16String((const PA_Unichar *)&buf[0]);
+		}
+    }
+           
+#else
+           CFStringRef str = CFStringCreateWithBytes(kCFAllocatorDefault, fromString->c_str(), fromString->length(), kCFStringEncodingUTF8, true);
+           if(str){
+               
+               *toString = CUTF16String((const PA_Unichar *)CFStringGetCharactersPtr(str), CFStringGetLength(str));	
+               CFRelease(str);
+           }
+#endif	
 }
 
 void ARRAY_TEXT::convertToUTF8(const CUTF16String* fromString, CUTF8String* toString)
 {
-	uint32_t size = ((uint32_t)fromString->length() * 4) + sizeof(uint8_t);
-	std::vector<uint8_t> buf(size);
+#ifdef _WIN32
+	int len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, (LPCWSTR)fromString->c_str(), fromString->length(), NULL, 0, NULL, NULL);
 	
-	uint32_t len = PA_ConvertCharsetToCharset(
-											  (char *)fromString->c_str(),
-											  (uint32_t)fromString->length() * sizeof(PA_Unichar),
-											  eVTC_UTF_16,
-											  (char *)&buf[0],
-											  size,
-											  eVTC_UTF_8
-											  );
-	
-	*toString = CUTF8String((const uint8_t *)&buf[0], len);
+	if(len){
+		std::vector<uint8_t> buf(len);
+		if(WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, (LPCWSTR)fromString->c_str(), fromString->length(), (LPSTR)&buf[0], len, NULL, NULL)){
+			*toString = CUTF8String((const uint8_t *)&buf[0]);
+		}
+	}
+           
+#else
+           CFStringRef str = CFStringCreateWithCharacters(kCFAllocatorDefault, (const UniChar *)fromString->c_str(), fromString->length());
+           if(str){
+               
+               size_t size = CFStringGetMaximumSizeForEncoding(CFStringGetLength(str), kCFStringEncodingUTF8) + sizeof(uint8_t);
+               std::vector<uint8_t> buf(size);
+               CFIndex len = 0;
+               CFStringGetBytes(str, CFRangeMake(0, CFStringGetLength(str)), kCFStringEncodingUTF8, 0, true, (UInt8 *)&buf[0], size, &len);
+               
+               *toString = CUTF8String((const uint8_t *)&buf[0], len);	
+               CFRelease(str);
+           }	
+           
+#endif
 }
 
 void ARRAY_TEXT::copyUTF8StringAtIndex(CUTF8String* pString, uint32_t index)
@@ -205,7 +220,7 @@ void ARRAY_TEXT::appendUTF16String(const PA_Unistring* pString)
 
 #if VERSIONMAC
 #ifdef __OBJC__	
-void ARRAY_TEXT::appendUTF16String(const NSString* pString)
+void ARRAY_TEXT::appendUTF16String(NSString* pString)
 {	
 	uint32_t len = [pString length];
 	uint32_t size = (len * sizeof(PA_Unichar)) + sizeof(PA_Unichar);
