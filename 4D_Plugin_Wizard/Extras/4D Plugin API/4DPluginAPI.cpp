@@ -44,67 +44,6 @@ FOURDCALL FourDPackex( long selector, void *parameters, void **data, void *resul
 	PluginMain( selector, &params );
 }
 
-void PA_ConvertToUTF8(const CUTF16String *fromString, CUTF8String* toString)
-{
-	uint32_t size = ((uint32_t)fromString->length() * 4) + sizeof(uint8_t);
-	std::vector<uint8_t> buf(size);
-	
-	uint32_t len = PA_ConvertCharsetToCharset(
-											  (char *)fromString->c_str(),
-											  (uint32_t)fromString->length() * sizeof(PA_Unichar),
-											  eVTC_UTF_16,
-											  (char *)&buf[0],
-											  size,
-											  eVTC_UTF_8
-											  );
-	
-	*toString = CUTF8String((const uint8_t *)&buf[0], len);
-}
-
-void PA_ConvertToUTF8(const PA_Unistring *fromString, CUTF8String* toString)
-{
-	CUTF16String ustring;
-	ustring = CUTF16String(fromString->fString, fromString->fLength);
-	PA_ConvertToUTF8(&ustring, toString);
-}
-
-void PA_ConvertFromUTF8(const CUTF8String *fromString, CUTF16String* toString)
-{
-	uint32_t size = ((uint32_t)fromString->length() * sizeof(PA_Unichar)) + sizeof(PA_Unichar);
-	std::vector<uint8_t> buf(size);
-	
-	uint32_t len = PA_ConvertCharsetToCharset(
-											  (char *)fromString->c_str(),
-											  (uint32_t)fromString->length(),
-											  eVTC_UTF_8,
-											  (char *)&buf[0],
-											  size,
-											  eVTC_UTF_16
-											  );
-	
-	*toString = CUTF16String((const PA_Unichar *)&buf[0], len);	
-}
-
-void PA_ConvertFromUTF8(const CUTF8String *fromString, PA_Unistring* toString)
-{
-	CUTF16String ustring;
-	PA_ConvertFromUTF8(fromString, &ustring);	
-	PA_SetUnistring(toString, (PA_Unichar *)ustring.c_str());
-}
-
-void PA_GetDatabaseFolderPath(CUTF16String *path)
-{
-	PA_Unistring p = PA_Get4Dfolder((PA_FolderKind)4, 0);
-	*path = CUTF16String(p.fString, p.fLength);
-}
-
-void PA_GetDatabaseFolderPath(CUTF8String *path)
-{
-	CUTF16String u;
-	PA_GetDatabaseFolderPath(&u);
-	PA_ConvertToUTF8(&u, path);
-}
-
 // -----------------------------------------
 //
 // Error codes
