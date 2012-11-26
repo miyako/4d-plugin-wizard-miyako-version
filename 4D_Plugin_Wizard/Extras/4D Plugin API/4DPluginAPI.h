@@ -34,6 +34,7 @@
 #include "ARRAY_INTEGER.h"
 #include "ARRAY_LONGINT.h"
 #include "ARRAY_REAL.h"
+#include "ARRAY_BOOLEAN.h"
 
 //some external libraries assume first load; include this file after them 
 #if VERSIONWIN
