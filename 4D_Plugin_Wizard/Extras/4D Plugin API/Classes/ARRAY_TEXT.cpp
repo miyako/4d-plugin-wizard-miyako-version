@@ -110,7 +110,7 @@ void ARRAY_TEXT::convertToUTF8(const CUTF16String* fromString, CUTF8String* toSt
 	int len = WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, (LPCWSTR)fromString->c_str(), fromString->length(), NULL, 0, NULL, NULL);
 	
 	if(len){
-		std::vector<uint8_t> buf(len);
+		std::vector<uint8_t> buf(len + 1);
 		if(WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, (LPCWSTR)fromString->c_str(), fromString->length(), (LPSTR)&buf[0], len, NULL, NULL)){
 			*toString = CUTF8String((const uint8_t *)&buf[0]);
 		}
