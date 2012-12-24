@@ -87,6 +87,14 @@ NSString* C_TEXT::copyPath()
 	return path;
 
 }		
+
+void C_TEXT::convertPath()
+{
+	NSString *posixPath = this->copyPath();
+	this->setUTF16String(posixPath);
+	[posixPath release];
+}
+
 NSURL *C_TEXT::copyUrl()
 {
 	NSURL *u = NULL;
@@ -125,6 +133,8 @@ void C_TEXT::convertFromUTF8(const CUTF8String* fromString, CUTF16String* toStri
 		if(MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, (LPCSTR)fromString->c_str(), fromString->length(), (LPWSTR)&buf[0], len)){
 			*toString = CUTF16String((const PA_Unichar *)&buf[0]);
 		}
+	}else{
+			*toString = CUTF16String((const PA_Unichar *)L"");
 	}
 	
 #else
@@ -149,6 +159,8 @@ void C_TEXT::convertToUTF8(const CUTF16String* fromString, CUTF8String* toString
 		if(WideCharToMultiByte(CP_UTF8, WC_ERR_INVALID_CHARS, (LPCWSTR)fromString->c_str(), fromString->length(), (LPSTR)&buf[0], len, NULL, NULL)){
 			*toString = CUTF8String((const uint8_t *)&buf[0]);
 		}
+	}else{
+			*toString = CUTF8String((const uint8_t *)"");
 	}
 
 #else
