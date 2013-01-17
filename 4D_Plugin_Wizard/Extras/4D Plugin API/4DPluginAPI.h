@@ -29,6 +29,7 @@
 #include "C_REAL.h"
 #include "C_BLOB.h"
 #include "C_PICTURE.h"
+#include "C_POINTER.h"
 
 #include "ARRAY_TEXT.h"
 #include "ARRAY_INTEGER.h"

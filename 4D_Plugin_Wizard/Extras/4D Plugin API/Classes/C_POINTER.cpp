@@ -10,7 +10,8 @@
 
 void C_POINTER::fromParamAtIndex(PackagePtr pParams, uint16_t index)
 {	
-	if(index){
+	if(index)
+	{
 		if (PA_IsCompiled(1))
 		{
 			PA_Variable *ptr = ((PA_Variable*)pParams[index - 1]);
@@ -21,53 +22,96 @@ void C_POINTER::fromParamAtIndex(PackagePtr pParams, uint16_t index)
 		}else{
 			this->_ptr = ((PA_Pointer)pParams[index - 1]);
 		}
+		
+		_ptrType = PA_GetPointerKind(this->_ptr);
+		_ptrValueType = PA_GetPointerValueKind(this->_ptr);
 	}
 }
 
-PA_Pointer C_POINTER::getPointer()
+void C_POINTER::getPointerBlock(PointerBlock *pointerBlock)
 {
-	return this->_ptr;
+	switch (this->_ptrType)
+	{
+		case ePK_PointerToVariable:	
+			
+			pointerBlock->fClass = this->_ptr->fClass;
+			pointerBlock->fScope = this->_ptr->fScope;
+			pointerBlock->uValue.fVariable.fTag = this->_ptr->uValue.fVariable.fTag;
+			pointerBlock->uValue.fVariable.fIndice = this->_ptr->uValue.fVariable.fIndice;			
+			
+			memcpy(pointerBlock->uValue.fVariable.fName,
+				   this->_ptr->uValue.fVariable.fName,
+				   sizeof(this->_ptr->uValue.fVariable.fName));
+			
+			break;
+			
+		case ePK_PointerToField:	
+			
+			pointerBlock->fClass = this->_ptr->fClass;
+			pointerBlock->fScope = this->_ptr->fScope;
+			pointerBlock->uValue.fTableField.fTable = this->_ptr->uValue.fTableField.fTable;
+			pointerBlock->uValue.fTableField.fField = this->_ptr->uValue.fTableField.fField;
+			pointerBlock->uValue.fTableField.fNbSubTables = this->_ptr->uValue.fTableField.fNbSubTables;
+			
+			memcpy(pointerBlock->uValue.fTableField.fSubTables,
+				   this->_ptr->uValue.fTableField.fSubTables,
+				   sizeof(this->_ptr->uValue.fTableField.fSubTables));
+			
+			break;
+		default:
+			break;			
+	}
 }
 
-void C_POINTER::setIntValue(int intValue)
+void C_POINTER::getVariable(PA_Variable *variable)
 {
-	PA_Variable intVar = PA_CreateVariable(eVK_Longint);
-	PA_SetLongintVariable(&intVar, intValue);
 	
-	switch (PA_GetPointerValueKind(this->_ptr)) {
-		case eVK_Longint:
-		case eVK_Real:
-		case eVK_Time:			
-			PA_SetPointerValue(this->_ptr, intVar);
+	PA_Variable v;
+
+	switch (this->_ptrType)
+	{
+		case ePK_PointerToVariable:	
+			
+			v = PA_GetPointerValue(this->_ptr);
+			
+			variable->fType		= v.fType;
+			variable->fFiller	= 1;
+			variable->uValue.fVariableDefinition.fTag = v.uValue.fVariableDefinition.fTag;
+			variable->uValue.fVariableDefinition.fIndice = v.uValue.fVariableDefinition.fIndice;
+			variable->uValue.fVariableDefinition.fType = v.uValue.fVariableDefinition.fType;
+			
+			memcpy(variable->uValue.fVariableDefinition.fName,
+				   v.uValue.fVariableDefinition.fName,
+				   sizeof(v.uValue.fVariableDefinition.fName));
+			
+			break;
+			
+		case ePK_PointerToField:
+			
+			variable->fType		= 3;
+			variable->fFiller	= 1;
+			variable->uValue.fTableFieldDefinition.fTableNumber = this->_ptr->uValue.fTableField.fTable;						
+			variable->uValue.fTableFieldDefinition.fFieldNumber = this->_ptr->uValue.fTableField.fField;	
+			variable->uValue.fTableFieldDefinition.fUnused1 = 0;
+			
+			break;
+		default:
 			break;		
-		default:
-			break;
 	}
-
-}
-
-int C_POINTER::getIntValue()
-{
-	int intValue = 0;
 	
-	switch (PA_GetPointerValueKind(this->_ptr)) {
-		case eVK_Longint:
-			intValue = (int)PA_GetLongintVariable(PA_GetPointerValue(this->_ptr));
-			break;			
-		case eVK_Real:
-			intValue = (int)PA_GetRealVariable(PA_GetPointerValue(this->_ptr));
-			break;
-		case eVK_Time:
-			intValue = (int)PA_GetTimeVariable(PA_GetPointerValue(this->_ptr));
-			break;			
-		default:
-			break;
-	}
-
-	return intValue;
 }
 
-C_POINTER::C_POINTER() : _ptr(0)
+PA_VariableKind C_POINTER::getValueType()
+{
+	return this->_ptrValueType;
+}
+
+PA_PointerKind C_POINTER::getType()
+{
+	return this->_ptrType;
+}
+
+C_POINTER::C_POINTER() : _ptr(0), _ptrType(ePK_InvalidPointer), _ptrValueType(eVK_Undefined)
 {
 	
 }

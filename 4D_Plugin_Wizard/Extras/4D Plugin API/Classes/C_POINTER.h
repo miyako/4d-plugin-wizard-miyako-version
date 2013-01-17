@@ -22,15 +22,18 @@ extern "C" {
 	private:
 		
 		PA_Pointer _ptr;
+		PA_PointerKind _ptrType;
+		PA_VariableKind _ptrValueType;
 		
 	public:
 			
 		void fromParamAtIndex(PackagePtr pParams, uint16_t index);
 
-		PA_Pointer getPointer();
+		void getPointerBlock(PointerBlock *pointerBlock);
+		void getVariable(PA_Variable *variable);
 		
-		int getIntValue();
-		void setIntValue(int intValue);	
+		PA_VariableKind getValueType();
+		PA_PointerKind getType();
 		
 		C_POINTER();
 		~C_POINTER();
