@@ -210,6 +210,17 @@ void C_TEXT::copyUTF8String(CUTF8String* pString)
 	convertToUTF8(this->_CUTF16String, pString);	
 }
 
+void C_TEXT::copyPath(CUTF8String* pString)
+{
+#if VERSIONMAC	
+	NSString *path = this->copyPath();
+	*pString = CUTF8String((const uint8_t *)[path UTF8String]);
+	[path release];
+#else
+	this->copyUTF8String(pString);
+#endif
+}
+
 C_TEXT::C_TEXT() : _CUTF16String(new CUTF16String)
 {
 	

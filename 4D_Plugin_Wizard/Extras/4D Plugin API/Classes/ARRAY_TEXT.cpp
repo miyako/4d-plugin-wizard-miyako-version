@@ -160,6 +160,20 @@ void ARRAY_TEXT::setUTF16StringAtIndex(const PA_Unichar* pString, uint32_t len, 
 	this->setUTF16StringAtIndex(&u, index);
 }
 
+
+void ARRAY_TEXT::copyPathAtIndex(CUTF8String* pString, uint32_t index)
+{
+#if VERSIONMAC
+#ifdef __OBJC__	
+	NSString *path = this->copyPathAtIndex(index);
+	*pString = CUTF8String((const uint8_t *)[path UTF8String]);
+	[path release];
+#endif
+#else
+	this->copyUTF8StringAtIndex(pString, index);
+#endif		
+}
+	
 void ARRAY_TEXT::setUTF16StringAtIndex(CUTF16String* pString, uint32_t index)
 {
 	if(index < this->_CUTF16StringArray->size())

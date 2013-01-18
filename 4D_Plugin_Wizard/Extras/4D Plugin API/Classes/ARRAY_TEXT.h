@@ -55,6 +55,7 @@ public:
 	
 	void copyUTF16StringAtIndex(CUTF16String* pString, uint32_t index);	
 	void copyUTF8StringAtIndex(CUTF8String* pString, uint32_t index);	
+	void copyPathAtIndex(CUTF8String* pString, uint32_t index);	
 	
 	uint32_t getSize();
 	void setSize(uint32_t size);
