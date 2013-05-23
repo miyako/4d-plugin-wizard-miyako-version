@@ -30,7 +30,7 @@ extern "C" {
 		void fromParamAtIndex(PackagePtr pParams, uint16_t index);
 
 		void getPointerBlock(PointerBlock *pointerBlock);
-		void getVariable(PA_Variable *variable, bool retain = true);
+		void getVariable(PA_Variable *variable);
 		
 		PA_VariableKind getValueType();
 		PA_PointerKind getType();
